@@ -168,19 +168,30 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            padding: 20px 0 80px 0;
+            gap: 1vw; /* VICTOR - Gap entre recuadros */
+            /*padding: 20px 0 80px 0;*/
         }
 
         .match-card-container {
             position: relative;
             width: 100%;
-            aspect-ratio: 1000 / 444;
+            /* Se elimina aspect-ratio: 1000 / 444; para que la imagen mande */
             overflow: hidden;
             background-color: var(--nva-bg-black);
         }
 
-        .card-bg, .card-outline, .card-bgb {
+        /* La imagen de fondo base pasa a flujo normal para definir la altura */
+        .card-bgb { 
+            position: relative; 
+            width: 100%;
+            height: auto;
+            display: block;
+            z-index: 3; 
+            pointer-events: none;
+        }
+
+        /* Las demás capas de superposición se mantienen absolutas cubriendo el 100% */
+        .card-bg, .card-outline {
             position: absolute;
             top: 0;
             left: 0;
@@ -189,7 +200,7 @@
             display: block;
             pointer-events: none;
         }
-        
+
         .card-bg { z-index: 4; transition: filter 0.2s ease; }
         .card-outline { z-index: 5; opacity: 0.8; mix-blend-mode: multiply; }
         .card-bgb { z-index: 3; }
