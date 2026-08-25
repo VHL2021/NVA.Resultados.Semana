@@ -306,14 +306,14 @@
         }
 
         .text-category {
-            top: 3.2%; left: 2.6%; width: 30%; height: 7%;
+            top: 4%; left: 3%; width: 33%; height: 7%;
             color: var(--nva-text); font-size: clamp(12px, 2.6vw, 48px);
             justify-content: flex-start; padding-left: 0.3vw;
             user-select: none; white-space: nowrap; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
         }
 
         .badge-slot {
-            position: absolute; top: 13.5%; width: 14%; aspect-ratio: 1;
+            position: absolute; top: 13.5%; width: 16%; aspect-ratio: 1;
             z-index: 3;
             display: flex; align-items: center; justify-content: center; pointer-events: auto; /*VICTOR ----------------------------------------------------------*/
             transition: background-color 0.2s, outline 0.2s;
@@ -321,7 +321,7 @@
 
         .badge-slot img { width: 100%; height: 100%; object-fit: contain; display: none; }
         .badge-home { left: 2.2%; }
-        .badge-away { left: 42.5%; }
+        .badge-away { right: 47.2%; }
 
         .text-score-home, .text-score-away {
             position: absolute; top: 20%; width: 13%; height: 30%;
@@ -334,11 +334,11 @@
             transition: background-color 0.2s, outline 0.2s;
         }
 
-        .text-score-home { left: 14.5%; }
+        .text-score-home { right: 75%; }
         .text-score-away { left: 30%; }
 
         .text-score-divider {
-            position: absolute; top: 20%; left: 26.2%; width: 5%; height: 30%;
+            position: absolute; top: 20%; left: 25%; width: 5%; height: 30%;
             font-size: clamp(32px, 10vw, 240px); transform: scaleY(1.5);
             transform-origin: center center; color: var(--nva-text);
             display: flex; align-items: center; justify-content: center;
@@ -346,7 +346,7 @@
         }
 
         .team-container {
-            position: absolute; cursor: pointer; z-index: 5;
+            position: absolute; top: 63%; left: 26.2%; width: 20%; height: 30%; cursor: pointer; z-index: 5;
             background: transparent;
             border: none; outline: none; display: flex; align-items: center;
             justify-content: center; overflow: hidden; text-align: center;
@@ -392,7 +392,7 @@
             outline: 2px dashed #2196f3 !important;
             z-index: 10 !important;
         }
-
+       
         .text-category:hover {
             background-color: rgba(233, 30, 99, 0.3) !important;
             outline: 2px dashed #e91e63 !important;
