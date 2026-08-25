@@ -43,6 +43,14 @@
             width: 100vw;
         }
 
+        #capture-area {
+            width: 100%;
+            background-color: var(--nva-bg-black);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         /* Barra de botones flotante en la parte inferior derecha */
         #excel-loader-bar {
             position: fixed;
@@ -279,7 +287,12 @@
             object-fit: cover;
             transform-origin: center center;
             touch-action: none;
-            transition: opacity 0.2s ease;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .photo-img:active {
+            cursor: grabbing;
         }
 
         .photo-placeholder {
@@ -313,9 +326,9 @@
         }
 
         .badge-slot {
-            position: absolute; top: 13.5%; width: 13%; aspect-ratio: 1;
+            position: absolute; top: 13.5%; width: 15%; aspect-ratio: 1;
             z-index: 3;
-            display: flex; align-items: center; justify-content: center; pointer-events: auto; /*VICTOR ----------------------------------------------------------*/
+            display: flex; align-items: center; justify-content: center; pointer-events: auto;
             transition: background-color 0.2s, outline 0.2s;
         }
 
@@ -324,7 +337,7 @@
         .badge-away { right: 47.2%; }
 
         .text-score-home, .text-score-away {
-            position: absolute; top: 25%; width: 13%; height: 30%;
+            position: absolute; top: 25%; width: 11%; height: 30%;
             font-size: clamp(32px, 10vw, 240px); line-height: 1; transform: scaleY(1.5);
             transform-origin: center center; color: var(--nva-text);
             text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.95); cursor: pointer;
@@ -359,26 +372,20 @@
             padding-right: 0.8em; padding-left: 0.6em;
         }
 
-        /* ==========================================================================
-           VISUALIZACIÓN DE ÁREAS AL PASAR EL RATÓN (HOVER) CON DISTINTOS COLORES
-           ========================================================================== */
-
-        /* 1. Área de la Imagen a cargar (Amarillo) */
+        /* VISUALIZACIÓN DE ÁREAS AL PASAR EL RATÓN (HOVER) */
         .card-photo-layer:hover {
             background-color: rgba(255, 235, 59, 0.25) !important;
             outline: 2px dashed #ffeb3b !important;
             z-index: 10 !important;
         }
 
-        /* 2. Área de los Logos (Verde Cian) - CORREGIDO */
         .badge-slot:hover {
             background-color: rgba(0, 255, 204, 0.25) !important;
             outline: 2px dashed #00ffcc !important;
             z-index: 10 !important;
-            pointer-events: auto !important; /* Habilita el evento del puntero */
+            pointer-events: auto !important;
         }
 
-        /* 3. Área de los Tanteos (Naranja / Coral) */
         .text-score-home:hover, 
         .text-score-away:hover {
             background-color: rgba(255, 87, 34, 0.3) !important;
@@ -386,7 +393,6 @@
             z-index: 10 !important;
         }
 
-        /* 4. Áreas de Texto (Equipos: Azul / Categoría: Magenta) */
         .team-container:hover {
             background-color: rgba(33, 150, 243, 0.3) !important;
             outline: 2px dashed #2196f3 !important;
@@ -476,16 +482,19 @@
         </div>
     </div>
 
-    <header id="header-banner">
-        <img id="bg-image" src="Imagenes/TITULO.png" alt="Nou Volei Alzira">
-        <div id="clickable-logo" title="Banner superior"></div>
-        <div id="clickable-calendar" title="Haz clic para seleccionar el rango de fechas"></div>
-        <div id="text-container">
-            <span id="date-text"></span>
-        </div>
-    </header>
+    <!-- Contenedor del área capturable para ajustar el alto del JPG al contenido exacto -->
+    <div id="capture-area">
+        <header id="header-banner">
+            <img id="bg-image" src="Imagenes/TITULO.png" alt="Nou Volei Alzira">
+            <div id="clickable-logo" title="Banner superior"></div>
+            <div id="clickable-calendar" title="Haz clic para seleccionar el rango de fechas"></div>
+            <div id="text-container">
+                <span id="date-text"></span>
+            </div>
+        </header>
 
-    <main id="main-content"></main>
+        <main id="main-content"></main>
+    </div>
 
     <!-- Modal Calendario Banner Superior -->
     <div id="calendarModal" class="modal">
@@ -549,7 +558,7 @@
             <button class="btn-add-card-below" title="Crear nuevo recuadro debajo">+</button>
 
             <!-- Capa 1: Foto al fondo -->
-            <div class="card-photo-layer" title="Mantén pulsado para mover, pellizca para hacer zoom, doble clic para cambiar">
+            <div class="card-photo-layer" title="Haz clic para subir foto. Arrastra para moverla y usa la rueda del ratón o pellizco para zoom. Doble clic para cambiar foto.">
                 <span class="photo-placeholder">📷 Clic para subir foto</span>
                 <img class="photo-img" src="" alt="Foto del partido">
                 
@@ -770,36 +779,58 @@
             }
         });
 
+        // PREPARAR TARJETAS PARA CAPTURA (FUSIONA MARCO DE COLOR Y SOMBRA MULTIPLY EN UNA SOLA IMAGEN CON CANVAS)
         async function prepareCardsForCapture() {
             const promises = [];
             document.querySelectorAll('.match-card-container').forEach(card => {
                 const cardBg = card.querySelector('.card-bg');
-                const filterStyle = cardBg.style.filter;
+                const cardOutline = card.querySelector('.card-outline');
                 
-                if (filterStyle && filterStyle.includes('hue-rotate')) {
-                    const p = new Promise((resolve) => {
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        img.src = cardBg.src;
-                        img.onload = () => {
+                const p = new Promise((resolve) => {
+                    const imgBg = new Image();
+                    const imgOutline = new Image();
+                    imgBg.crossOrigin = "anonymous";
+                    imgOutline.crossOrigin = "anonymous";
+
+                    let loadedCount = 0;
+                    const onImageLoad = () => {
+                        loadedCount++;
+                        if (loadedCount === 2) {
                             const canvas = document.createElement('canvas');
-                            canvas.width = img.naturalWidth || 1000;
-                            canvas.height = img.naturalHeight || 444;
+                            canvas.width = imgBg.naturalWidth || 1000;
+                            canvas.height = imgBg.naturalHeight || 444;
                             const ctx = canvas.getContext('2d');
-                            ctx.filter = filterStyle;
-                            ctx.drawImage(img, 0, 0);
                             
+                            // 1. Dibujar el recuadro con color
+                            ctx.drawImage(imgBg, 0, 0, canvas.width, canvas.height);
+                            
+                            // 2. Fusionar la sombra por encima usando multiply
+                            ctx.globalCompositeOperation = 'multiply';
+                            ctx.globalAlpha = 0.8;
+                            ctx.drawImage(imgOutline, 0, 0, canvas.width, canvas.height);
+
+                            // Guardar originales para restaurar después
                             cardBg.dataset.tempCapturedSrc = cardBg.src;
-                            cardBg.dataset.tempFilter = filterStyle;
-                            
+                            cardOutline.dataset.tempDisplay = cardOutline.style.display;
+
+                            // Reemplazar la fuente de cardBg por la imagen ya fusionada
                             cardBg.src = canvas.toDataURL('image/png');
-                            cardBg.style.filter = 'none';
+                            // Ocultar temporalmente cardOutline para evitar duplicar la sombra durante el screenshot
+                            cardOutline.style.display = 'none';
+                            
                             resolve();
-                        };
-                        img.onerror = () => resolve();
-                    });
-                    promises.push(p);
-                }
+                        }
+                    };
+
+                    imgBg.onload = onImageLoad;
+                    imgOutline.onload = onImageLoad;
+                    imgBg.onerror = () => resolve();
+                    imgOutline.onerror = () => resolve();
+
+                    imgBg.src = cardBg.src;
+                    imgOutline.src = cardOutline.src;
+                });
+                promises.push(p);
             });
             await Promise.all(promises);
         }
@@ -807,13 +838,15 @@
         function restoreCardsAfterCapture() {
             document.querySelectorAll('.match-card-container').forEach(card => {
                 const cardBg = card.querySelector('.card-bg');
+                const cardOutline = card.querySelector('.card-outline');
+                
                 if (cardBg.dataset.tempCapturedSrc) {
                     cardBg.src = cardBg.dataset.tempCapturedSrc;
                     delete cardBg.dataset.tempCapturedSrc;
                 }
-                if (cardBg.dataset.tempFilter) {
-                    cardBg.style.filter = cardBg.dataset.tempFilter;
-                    delete cardBg.dataset.tempFilter;
+                if (cardOutline.dataset.tempDisplay !== undefined) {
+                    cardOutline.style.display = cardOutline.dataset.tempDisplay;
+                    delete cardOutline.dataset.tempDisplay;
                 }
             });
         }
@@ -827,10 +860,18 @@
             const excelBar = document.getElementById('excel-loader-bar');
             excelBar.style.display = 'none';
 
+            // Genera la capa combinada con la sombra (multiply) renderizada en canvas antes de capturar
             await prepareCardsForCapture();
 
+            const captureElement = document.getElementById('capture-area');
+
             setTimeout(() => {
-                html2canvas(document.body, { backgroundColor: '#000000', scale: 2, useCORS: true, allowTaint: true })
+                html2canvas(captureElement, { 
+                    backgroundColor: '#000000', 
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: true 
+                })
                 .then(canvas => {
                     excelBar.style.display = 'flex';
                     restoreCardsAfterCapture();
@@ -1223,16 +1264,12 @@
             cardBg.dataset.appliedColor = 'FFFFFF';
             applyColorFilter(cardBg, 'FFFFFF');
 
-            // --- VARIABLES DE GESTOS ---
+            // --- VARIABLES DE GESTOS E IMAGEN ---
             let imgScale = 1, imgTranslateX = 0, imgTranslateY = 0;
-            let isDraggingImg = false, dragStartX = 0, dragStartY = 0;
-            let touchStartX = 0, touchStartY = 0;
-            
+            let isDraggingImg = false;
+            let dragStartX = 0, dragStartY = 0;
             let initialPinchDistance = null;
             let initialScale = 1;
-
-            let longPressTimer = null;
-            const LONG_PRESS_DURATION = 400; 
 
             function updateImgTransform() { 
                 photoImg.style.transform = `translate(${imgTranslateX}px, ${imgTranslateY}px) scale(${imgScale})`; 
@@ -1242,27 +1279,18 @@
                 return Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
             }
 
-            // --- GESTOS TÁCTILES ---
+            // --- GESTOS TÁCTILES INSTANTÁNEOS (NUEVO) ---
             photoImg.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 2) {
                     e.preventDefault();
-                    clearTimeout(longPressTimer);
                     isDraggingImg = false;
                     initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
                     initialScale = imgScale;
-                    photoImg.style.opacity = '1';
                 } else if (e.touches.length === 1) {
-                    const touch = e.touches[0];
-                    touchStartX = touch.clientX;
-                    touchStartY = touch.clientY;
-                    dragStartX = touch.clientX - imgTranslateX;
-                    dragStartY = touch.clientY - imgTranslateY;
-                    
-                    longPressTimer = setTimeout(() => {
-                        isDraggingImg = true;
-                        photoImg.style.cursor = 'grabbing';
-                        photoImg.style.opacity = '0.85'; 
-                    }, LONG_PRESS_DURATION);
+                    e.preventDefault();
+                    isDraggingImg = true;
+                    dragStartX = e.touches[0].clientX - imgTranslateX;
+                    dragStartY = e.touches[0].clientY - imgTranslateY;
                 }
             }, { passive: false });
 
@@ -1275,33 +1303,20 @@
                         imgScale = Math.max(0.05, initialScale * scaleDiff);
                         updateImgTransform();
                     }
-                } else if (e.touches.length === 1) {
-                    if (isDraggingImg) {
-                        e.preventDefault();
-                        imgTranslateX = e.touches[0].clientX - dragStartX;
-                        imgTranslateY = e.touches[0].clientY - dragStartY;
-                        updateImgTransform();
-                    } else {
-                        let dx = e.touches[0].clientX - touchStartX;
-                        let dy = e.touches[0].clientY - touchStartY;
-                        if (Math.hypot(dx, dy) > 10) {
-                            clearTimeout(longPressTimer);
-                        }
-                    }
+                } else if (e.touches.length === 1 && isDraggingImg) {
+                    e.preventDefault();
+                    imgTranslateX = e.touches[0].clientX - dragStartX;
+                    imgTranslateY = e.touches[0].clientY - dragStartY;
+                    updateImgTransform();
                 }
             }, { passive: false });
 
             photoImg.addEventListener('touchend', () => {
-                clearTimeout(longPressTimer);
                 initialPinchDistance = null;
-                if (isDraggingImg) {
-                    isDraggingImg = false;
-                    photoImg.style.cursor = 'default';
-                    photoImg.style.opacity = '1';
-                }
+                isDraggingImg = false;
             });
 
-            // --- GESTOS RATÓN ---
+            // --- GESTOS DE RATÓN INSTANTÁNEOS (NUEVO) ---
             photoImg.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 const zoomIntensity = 0.1;
@@ -1312,16 +1327,9 @@
 
             photoImg.addEventListener('mousedown', (e) => {
                 e.preventDefault();
+                isDraggingImg = true;
                 dragStartX = e.clientX - imgTranslateX;
                 dragStartY = e.clientY - imgTranslateY;
-                touchStartX = e.clientX;
-                touchStartY = e.clientY;
-                
-                longPressTimer = setTimeout(() => {
-                    isDraggingImg = true;
-                    photoImg.style.cursor = 'grabbing';
-                    photoImg.style.opacity = '0.85';
-                }, LONG_PRESS_DURATION);
             });
 
             window.addEventListener('mousemove', (e) => {
@@ -1330,19 +1338,12 @@
                     imgTranslateX = e.clientX - dragStartX;
                     imgTranslateY = e.clientY - dragStartY;
                     updateImgTransform();
-                } else if (longPressTimer) {
-                    let dx = e.clientX - touchStartX;
-                    let dy = e.clientY - touchStartY;
-                    if (Math.hypot(dx, dy) > 5) clearTimeout(longPressTimer);
                 }
             });
 
             window.addEventListener('mouseup', () => {
-                clearTimeout(longPressTimer);
                 if (isDraggingImg) {
                     isDraggingImg = false;
-                    photoImg.style.cursor = 'default';
-                    photoImg.style.opacity = '1';
                 }
             });
 
@@ -1397,7 +1398,6 @@
                         photoImg.style.display = 'block';
                         photoPlaceholder.style.display = 'none';
                         imgScale = 1; imgTranslateX = 0; imgTranslateY = 0; updateImgTransform();
-                        photoImg.style.cursor = 'default';
                     };
                     reader.readAsDataURL(file);
                 }
