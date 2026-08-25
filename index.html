@@ -43,26 +43,22 @@
             width: 100vw;
         }
 
+        /* Barra de botones flotante en la parte inferior derecha */
         #excel-loader-bar {
-            width: 100%;
-            background-color: var(--nva-bg-dark);
-            padding: 10px 20px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            flex-wrap: nowrap;
-            overflow-x: auto;
             gap: 10px;
-            border-bottom: 1px solid #333;
             font-family: Arial, sans-serif;
             font-size: 13px;
-            z-index: 100;
-        }
-
-        .bar-left {
-            display: flex;
-            align-items: center;
-            gap: 0.05vh;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.85);
+            padding: 10px 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
         }
 
         .bar-actions {
@@ -71,11 +67,11 @@
             align-items: center;
         }
 
-        #excel-loader-bar button, #jpg-button, #btn-add-first, #btn-reset, #btn-toggle-bottom-texts {
+        #excel-loader-bar button, #jpg-button, #btn-add-first, #btn-reset {
             color: var(--nva-text);
             cursor: pointer;
             background: var(--nva-primary);
-            padding: 7px 16px;
+            padding: 8px 16px;
             border-radius: 5px;
             font-weight: bold;
             border: 1px solid var(--nva-primary-hover);
@@ -85,19 +81,6 @@
             font-size: 13px;
             flex-shrink: 0;
             white-space: nowrap;
-        }
-
-        /* Estilo específico para el botón de icono pequeño */
-        #btn-toggle-bottom-texts {
-            background: #333333;
-            border-color: #555555;
-            padding: 7px 10px;
-            font-size: 15px;
-        }
-
-        #btn-toggle-bottom-texts:hover {
-            background: #444444;
-            transform: scale(1.03);
         }
 
         #btn-reset {
@@ -130,11 +113,6 @@
         #btn-add-first:hover {
             background: var(--nva-btn-green-hover);
             transform: scale(1.03);
-        }
-
-        #excel-status {
-            color: var(--nva-success);
-            font-weight: bold;
         }
 
         #header-banner {
@@ -191,7 +169,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
-            padding: 20px 0;
+            padding: 20px 0 80px 0;
         }
 
         .match-card-container {
@@ -364,23 +342,6 @@
             padding-right: 0.8em; padding-left: 0.6em;
         }
 
-        .bottom-bar-text {
-            position: absolute; bottom: 2%; height: 12.8%; display: flex; align-items: center;
-            color: var(--nva-text); font-size: clamp(18px, 3.1vw, 64px); line-height: 1;
-            outline: none; cursor: pointer; z-index: 10; white-space: nowrap;
-            text-shadow: 2px 2px 5px rgba(0,0,0,0.9); padding-right: 0.2em; padding-left: 0.2em;
-            transition: opacity 0.2s ease;
-        }
-
-        .text-datetime { left: 2.5%; width: 44%; justify-content: flex-start; }
-        .text-venue { right: 2.5%; width: 50%; justify-content: flex-end; cursor: text; }
-
-        /* Clase auxiliar para ocultar los textos inferiores */
-        .match-card-container.hide-bottom-texts .bottom-bar-text {
-            opacity: 0;
-            pointer-events: none;
-        }
-
         .modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.85);
@@ -425,10 +386,6 @@
         .btn-modal-action { background-color: var(--nva-primary); color: var(--nva-text); padding: 10px 24px; border: none; border-radius: 5px; font-size: 15px; font-weight: bold; cursor: pointer; }
         .btn-modal-action:hover { background-color: var(--nva-primary-hover); }
 
-        .datetime-picker-group { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; text-align: left; }
-        .datetime-picker-group label { font-size: 13px; color: #aaa; margin-bottom: 5px; display: block; }
-        .datetime-picker-group input { width: 100%; padding: 10px; background: #252525; border: 1px solid #555; color: #fff; border-radius: 5px; font-size: 16px; font-family: Arial, sans-serif; color-scheme: dark; }
-
         .glow-winner {
             text-shadow: 0.2vw 0.2vw 0.5vw rgba(0,0,0,0.9), 0 0 2.5vw rgba(0, 255, 0, 0.9), 0 0 1vw rgba(0, 255, 0, 1) !important;
             transition: text-shadow 0.3s ease;
@@ -452,14 +409,9 @@
 </head>
 <body>
 
+    <!-- Barra flotante de acciones en la esquina inferior derecha -->
     <div id="excel-loader-bar">
-        <div class="bar-left">
-            <span id="excel-status">📋 11 equipos cargados por defecto</span>
-        </div>
         <div class="bar-actions">
-            <!-- Botón de icono para mostrar/ocultar textos inferiores -->
-            <button id="btn-toggle-bottom-texts" title="Mostrar/Ocultar textos inferiores">👁️</button>
-            <!-- Botón Reset Añadido -->
             <button id="btn-reset">🔄 RESET</button>
             <button id="btn-add-first">➕ NUEVO RECUADRO</button>
             <button id="jpg-button">📥 DESCARGAR JPG</button>
@@ -467,7 +419,7 @@
     </div>
 
     <header id="header-banner">
-        <img id="bg-image" src="Imagenes/TITULO 1.png" alt="Nou Volei Alzira">
+        <img id="bg-image" src="Imagenes/TITULO.png" alt="Nou Volei Alzira">
         <div id="clickable-logo" title="Banner superior"></div>
         <div id="clickable-calendar" title="Haz clic para seleccionar el rango de fechas"></div>
         <div id="text-container">
@@ -503,24 +455,6 @@
         </div>
     </div>
 
-    <!-- Modal Fecha y Hora Interactivo para Recuadro -->
-    <div id="cardDateTimeModal" class="modal">
-        <div class="modal-box" style="max-width: 380px;">
-            <h3>Seleccionar Fecha y Hora</h3>
-            <div class="datetime-picker-group">
-                <div>
-                    <label for="cardDatePicker">Fecha del Partido:</label>
-                    <input type="date" id="cardDatePicker">
-                </div>
-                <div>
-                    <label for="cardTimePicker">Hora del Partido:</label>
-                    <input type="time" id="cardTimePicker">
-                </div>
-            </div>
-            <button id="applyCardDateTimeBtn" class="btn-modal-action">Aplicar Fecha y Hora</button>
-        </div>
-    </div>
-
     <!-- Modal selección de tanteo -->
     <div id="scoreModal" class="modal">
         <div class="modal-box">
@@ -550,7 +484,7 @@
         </div>
     </div>
 
-    <!-- Plantilla del cuadro -->
+    <!-- Plantilla del cuadro sin elementos inferiores -->
     <template id="card-template">
         <div class="match-card-container">
             <button class="btn-delete-card" title="Eliminar este recuadro">✕</button>
@@ -587,9 +521,6 @@
                 
                 <input type="file" accept="image/*" style="display: none;">
             </div>
-
-            <div class="text-overlay bottom-bar-text text-datetime" title="Haz clic para cambiar fecha y hora">21/09/26 10:00H</div>
-            <div class="text-overlay bottom-bar-text text-venue" contenteditable="true" spellcheck="false">PALAU D'ESPORTS ALZIRA</div>
         </div>
     </template>
 
@@ -613,11 +544,9 @@
         let OTROS_EQUIPOS_DATA = [];
 
         // Referencias del DOM
-        const excelStatus = document.getElementById('excel-status');
         const jpgButton = document.getElementById('jpg-button');
         const btnAddFirst = document.getElementById('btn-add-first');
         const btnReset = document.getElementById('btn-reset');
-        const btnToggleBottomTexts = document.getElementById('btn-toggle-bottom-texts');
         const calendarArea = document.getElementById('clickable-calendar');
         const calendarModal = document.getElementById('calendarModal');
         const applyCalendarButton = document.getElementById('applyCalendarButton');
@@ -634,7 +563,6 @@
         let currentTargetSide = 'home';
         let activeModalTab = 'nva';
         let currentScoreElement = null;
-        let bottomTextsHidden = false; // Estado para mostrar/ocultar textos inferiores
 
         // Referencias de Modales
         const calendarMonthTitle = document.getElementById('calendarMonthTitle');
@@ -649,11 +577,6 @@
         const modalTeamTitle = document.getElementById('modalTeamTitle');
         const scoreModal = document.getElementById('scoreModal');
         const scoreModalTitle = document.getElementById('scoreModalTitle');
-        const cardDateTimeModal = document.getElementById('cardDateTimeModal');
-        const cardDatePicker = document.getElementById('cardDatePicker');
-        const cardTimePicker = document.getElementById('cardTimePicker');
-        const applyCardDateTimeBtn = document.getElementById('applyCardDateTimeBtn');
-        let currentTargetDateTimeElement = null;
         const tabNvaBtn = document.getElementById('tabNvaBtn');
         const tabOthersBtn = document.getElementById('tabOthersBtn');
 
@@ -680,7 +603,6 @@
         function saveAppState() {
             const state = {
                 dateText: document.getElementById('date-text').textContent,
-                bottomTextsHidden: bottomTextsHidden,
                 cards: []
             };
 
@@ -695,8 +617,6 @@
                     awayLogo: card.querySelector('.badge-away img').getAttribute('src') || '',
                     homeLogoDisplay: card.querySelector('.badge-home img').style.display,
                     awayLogoDisplay: card.querySelector('.badge-away img').style.display,
-                    datetime: card.querySelector('.text-datetime').textContent,
-                    venue: card.querySelector('.text-venue').textContent,
                     colorCode: card.querySelector('.card-bg').dataset.appliedColor || ''
                 });
             });
@@ -716,29 +636,14 @@
                 fitCalendarText();
             }
 
-            if (typeof state.bottomTextsHidden !== 'undefined') {
-                bottomTextsHidden = state.bottomTextsHidden;
-                if (bottomTextsHidden) {
-                    btnToggleBottomTexts.textContent = '👁️‍🗨️';
-                } else {
-                    btnToggleBottomTexts.textContent = '👁️';
-                }
-            }
-
             if (state.cards && state.cards.length > 0) {
                 state.cards.forEach(cardData => {
                     createNewCard(); 
                     const currentCard = mainContent.lastElementChild;
 
-                    if (bottomTextsHidden) {
-                        currentCard.classList.add('hide-bottom-texts');
-                    }
-
                     currentCard.querySelector('.text-category').textContent = cardData.category;
                     currentCard.querySelector('.text-score-home').textContent = cardData.homeScore;
                     currentCard.querySelector('.text-score-away').textContent = cardData.awayScore;
-                    currentCard.querySelector('.text-datetime').textContent = cardData.datetime;
-                    currentCard.querySelector('.text-venue').textContent = cardData.venue;
 
                     const homeSpan = currentCard.querySelector('.team-home-container .team-inner-text');
                     homeSpan.textContent = cardData.homeTeam;
@@ -770,28 +675,6 @@
             return true;
         }
 
-        // === EVENTO BOTÓN MOSTRAR/OCULTAR TEXTOS INFERIORES ===
-        btnToggleBottomTexts.addEventListener('click', () => {
-            bottomTextsHidden = !bottomTextsHidden;
-            if (bottomTextsHidden) {
-                btnToggleBottomTexts.textContent = '👁️‍🗨️';
-                showToast('Textos inferiores ocultados en todos los recuadros.');
-            } else {
-                btnToggleBottomTexts.textContent = '👁️';
-                showToast('Textos inferiores mostrados en todos los recuadros.');
-            }
-
-            document.querySelectorAll('.match-card-container').forEach(card => {
-                if (bottomTextsHidden) {
-                    card.classList.add('hide-bottom-texts');
-                } else {
-                    card.classList.remove('hide-bottom-texts');
-                }
-            });
-
-            saveAppState();
-        });
-
         function updateAddFirstButtonVisibility() {
             const cardCount = mainContent.querySelectorAll('.match-card-container').length;
             if (cardCount === 0) {
@@ -811,7 +694,6 @@
                 document.getElementById('date-text').textContent = '';
                 localStorage.removeItem('nvaAppSavedState');
 
-                // Genera automáticamente el primer recuadro e independiza el nuevo estado
                 createNewCard();
                 saveAppState();
 
@@ -919,8 +801,6 @@
                 if (loadedNva.length > 0) EQUIPOS_NVA_DATA = loadedNva;
                 if (loadedOthers.length > 0) OTROS_EQUIPOS_DATA = loadedOthers;
 
-                excelStatus.textContent = `✅ Actualizado (${sourceName})`;
-                excelStatus.style.color = "var(--nva-success)";
                 renderTeamModalList();
                 showToast(`Excel actualizado con éxito desde '${sourceName}'.`);
                 return true;
@@ -931,7 +811,6 @@
         }
 
         async function tryAutoLoadExcel() {
-            // Se busca DATOS.xls y variaciones estándar
             const fileNames = ["DATOS.xls", "DATOS.xlsx", "Datos.xls", "Datos.xlsx"];
             for (let fileName of fileNames) {
                 try {
@@ -1044,27 +923,37 @@
         function updateMatchGlow(card) {
             const scoreHomeEl = card.querySelector('.text-score-home');
             const scoreAwayEl = card.querySelector('.text-score-away');
-            const teamHomeEl = card.querySelector('.team-home-container .team-inner-text');
-            const teamAwayEl = card.querySelector('.team-away-container .team-inner-text');
+            const teamHomeSpan = card.querySelector('.team-home-container .team-inner-text');
+            const teamAwaySpan = card.querySelector('.team-away-container .team-inner-text');
             const logoHomeEl = card.querySelector('.badge-home img');
             const logoAwayEl = card.querySelector('.badge-away img');
 
             const scoreHome = parseInt(scoreHomeEl.textContent) || 0;
             const scoreAway = parseInt(scoreAwayEl.textContent) || 0;
 
-            [scoreHomeEl, scoreAwayEl, teamHomeEl, teamAwayEl].forEach(el => { if(el) el.classList.remove('glow-winner', 'glow-loser'); });
-            [logoHomeEl, logoAwayEl].forEach(el => { if(el) el.classList.remove('glow-winner-img', 'glow-loser-img'); });
+            [scoreHomeEl, scoreAwayEl, teamHomeSpan, teamAwaySpan].forEach(el => { 
+                if (el) el.classList.remove('glow-winner', 'glow-loser'); 
+            });
+            [logoHomeEl, logoAwayEl].forEach(el => { 
+                if (el) el.classList.remove('glow-winner-img', 'glow-loser-img'); 
+            });
 
             if (scoreHome > scoreAway) {
-                scoreHomeEl.classList.add('glow-winner'); teamHomeEl.classList.add('glow-winner');
-                if(logoHomeEl) logoHomeEl.classList.add('glow-winner-img');
-                scoreAwayEl.classList.add('glow-loser'); teamAwayEl.classList.add('glow-loser');
-                if(logoAwayEl) logoAwayEl.classList.add('glow-loser-img');
+                scoreHomeEl.classList.add('glow-winner'); 
+                teamHomeSpan.classList.add('glow-winner');
+                if (logoHomeEl) logoHomeEl.classList.add('glow-winner-img');
+
+                scoreAwayEl.classList.add('glow-loser'); 
+                teamAwaySpan.classList.add('glow-loser');
+                if (logoAwayEl) logoAwayEl.classList.add('glow-loser-img');
             } else if (scoreAway > scoreHome) {
-                scoreAwayEl.classList.add('glow-winner'); teamAwayEl.classList.add('glow-winner');
-                if(logoAwayEl) logoAwayEl.classList.add('glow-winner-img');
-                scoreHomeEl.classList.add('glow-loser'); teamAwayEl.classList.add('glow-loser');
-                if(logoHomeEl) logoHomeEl.classList.add('glow-loser-img');
+                scoreAwayEl.classList.add('glow-winner'); 
+                teamAwaySpan.classList.add('glow-winner');
+                if (logoAwayEl) logoAwayEl.classList.add('glow-winner-img');
+
+                scoreHomeEl.classList.add('glow-loser'); 
+                teamHomeSpan.classList.add('glow-loser');
+                if (logoHomeEl) logoHomeEl.classList.add('glow-loser-img');
             }
         }
 
@@ -1079,20 +968,6 @@
                 scoreModal.style.display = 'none';
                 currentScoreElement = null;
             });
-        });
-
-        applyCardDateTimeBtn.addEventListener('click', () => {
-            if (currentTargetDateTimeElement && cardDatePicker.value) {
-                const parts = cardDatePicker.value.split('-');
-                if (parts.length === 3) {
-                    const formattedDate = `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
-                    const timeVal = cardTimePicker.value ? `${cardTimePicker.value}H` : '10:00H';
-                    currentTargetDateTimeElement.textContent = `${formattedDate} ${timeVal}`;
-                    saveAppState(); 
-                }
-            }
-            cardDateTimeModal.style.display = 'none';
-            currentTargetDateTimeElement = null;
         });
 
         function applyColorFilter(cardBg, colorCode) {
@@ -1186,9 +1061,7 @@
                 let teamName = item.EQUIPO || item.equipo || '';
                 const categoryName = (item.CATEGORIA || item.categoria || '').toString().trim();
                 const colorCode = item.COLOR || item.color || '';
-                const campoVal = item.CAMPO || item.Campo || item.campo || '';
 
-                // Ruta para los logos ajustada a la carpeta LOGOs/
                 const logoPreview = (logoVal && String(logoVal).trim() !== "NaN") 
                     ? `<img src="LOGOs/${logoVal}.png" style="width:20px; height:20px; object-fit:contain; vertical-align:middle; margin-right:6px;" alt="Logo">` 
                     : `<span style="color:#666; font-size:11px; margin-right:6px;">[Sin Logo]</span>`;
@@ -1221,13 +1094,11 @@
                     const targetCont = currentActiveCard.querySelector(currentTargetSide === 'home' ? '.team-home-container' : '.team-away-container');
                     const targetSpan = targetCont.querySelector('.team-inner-text');
                     const targetBadgeImg = currentActiveCard.querySelector(currentTargetSide === 'home' ? '.badge-home img' : '.badge-away img');
-                    const venueEl = currentActiveCard.querySelector('.text-venue');
 
                     targetSpan.textContent = teamName;
                     autoFitTeamText(targetCont, targetSpan);
 
                     if (logoVal && String(logoVal).trim() !== "" && String(logoVal).trim() !== "NaN") {
-                        // Ruta para los logos ajustada a la carpeta LOGOs/
                         targetBadgeImg.src = `LOGOs/${logoVal}.png`;
                         targetBadgeImg.style.display = 'block';
                     } else {
@@ -1240,9 +1111,6 @@
                             applyColorFilter(cardBg, colorCode);
                             cardBg.dataset.appliedColor = colorCode; 
                         }
-                        if (currentTargetSide === 'home') venueEl.textContent = "PALAU D'ESPORTS ALZIRA";
-                    } else {
-                        if (currentTargetSide === 'home') venueEl.textContent = campoVal ? campoVal.toString().toUpperCase() : "PALAU D'ESPORTS ALZIRA";
                     }
 
                     teamPickerModal.style.display = 'none';
@@ -1276,17 +1144,11 @@
             const awaySpan = awayCont.querySelector('.team-inner-text');
             const scoreHome = clone.querySelector('.text-score-home');
             const scoreAway = clone.querySelector('.text-score-away');
-            const datetimeEl = clone.querySelector('.text-datetime');
             
             const photoLayer = clone.querySelector('.card-photo-layer');
             const photoInput = photoLayer.querySelector('input[type="file"]');
             const photoImg = photoLayer.querySelector('.photo-img');
             const photoPlaceholder = photoLayer.querySelector('.photo-placeholder');
-
-            // Aplicar estado actual de visibilidad de textos inferiores a los nuevos recuadros
-            if (bottomTextsHidden) {
-                cardContainer.classList.add('hide-bottom-texts');
-            }
 
             // --- VARIABLES DE GESTOS ---
             let imgScale = 1, imgTranslateX = 0, imgTranslateY = 0;
@@ -1307,7 +1169,7 @@
                 return Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY);
             }
 
-            // --- GESTOS TÁCTILES (MÓVILES) ---
+            // --- GESTOS TÁCTILES ---
             photoImg.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 2) {
                     e.preventDefault();
@@ -1366,7 +1228,7 @@
                 }
             });
 
-            // --- GESTOS RATÓN (PC - FALLBACK) ---
+            // --- GESTOS RATÓN ---
             photoImg.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 const zoomIntensity = 0.1;
@@ -1411,7 +1273,6 @@
                 }
             });
 
-
             // Lógica de interfaz general
             homeCont.style.left = `${CONFIG_AREA.homeLeft}%`; homeCont.style.width = `${CONFIG_AREA.homeWidth}%`; homeCont.style.height = `${CONFIG_AREA.height}%`; homeCont.style.bottom = `${CONFIG_AREA.bottomOffset}%`;
             awayCont.style.left = `${CONFIG_AREA.awayLeft}%`; awayCont.style.width = `${CONFIG_AREA.awayWidth}%`; awayCont.style.height = `${CONFIG_AREA.height}%`; awayCont.style.bottom = `${CONFIG_AREA.bottomOffset}%`;
@@ -1432,14 +1293,6 @@
                 if (isHomeDefault && isAwayDefault) { activeModalTab = 'nva'; tabNvaBtn.classList.add('active'); tabOthersBtn.classList.remove('active'); } 
                 else { activeModalTab = 'others'; tabOthersBtn.classList.add('active'); tabNvaBtn.classList.remove('active'); }
                 teamPickerModal.style.display = 'flex'; renderTeamModalList();
-            });
-
-            datetimeEl.addEventListener('click', () => {
-                currentTargetDateTimeElement = datetimeEl;
-                const today = new Date();
-                cardDatePicker.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-                cardTimePicker.value = "10:00";
-                cardDateTimeModal.style.display = 'flex';
             });
 
             scoreHome.addEventListener('click', () => { currentScoreElement = scoreHome; scoreModalTitle.textContent = 'Seleccionar Tanteo Local'; scoreModal.style.display = 'flex'; });
@@ -1492,7 +1345,6 @@
             if (e.target === calendarModal) calendarModal.style.display = 'none';
             if (e.target === teamPickerModal) teamPickerModal.style.display = 'none';
             if (e.target === scoreModal) { scoreModal.style.display = 'none'; currentScoreElement = null; }
-            if (e.target === cardDateTimeModal) { cardDateTimeModal.style.display = 'none'; currentTargetDateTimeElement = null; }
         });
 
         // === INICIALIZACIÓN ===
