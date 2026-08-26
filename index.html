@@ -1745,9 +1745,17 @@
         // === INICIALIZACIÓN DE LA APLICACIÓN ===
         renderTeamModalList();
         tryAutoLoadExcel();
-        
+
         if (!loadAppState()) {
             createNewCard();
+        } else {
+            // Forzar el reajuste de textos una vez que el navegador ha calculado el layout/geometría
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    fitCalendarText();
+                    refreshAllTeamTexts();
+                }, 50);
+            });
         }
     </script>
 </body>
