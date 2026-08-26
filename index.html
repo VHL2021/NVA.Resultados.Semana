@@ -27,8 +27,6 @@
             --nva-btn-green-hover: #00cc00;
             --nva-btn-purple: #8e44ad;
             --nva-btn-purple-hover: #9b59b6;
-            --nva-btn-blue: #5564eb;
-            --nva-btn-blue-hover: #094293;
         }
 
         * {
@@ -70,7 +68,7 @@
             font-family: Arial, sans-serif;
             font-size: 13px;
             z-index: 1000;
-            background: rgba(26, 26, 26, 0.85);
+            /*background: rgba(26, 26, 26, 0.85);
             /*padding: 10px 15px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
@@ -80,11 +78,11 @@
         #btn-load-history {
             color: var(--nva-text);
             cursor: pointer;
-            background: var(--nva-btn-blue);
+            background: var(--nva-btn-green);
             padding: 8px 16px;
             border-radius: 5px;
             font-weight: bold;
-            border: 1px solid var(--nva-btn-blue-hover);
+            /*border: 1px solid var(--nva-btn-green-hover);*/
             transition: background 0.2s, transform 0.1s;
             display: inline-block;
             font-family: Arial, sans-serif;
@@ -92,10 +90,12 @@
             flex-shrink: 0;
             white-space: nowrap;
             shadow: 0 4px 15px rgba(0,0,0,0.8);
+            border-color: var(--nva-btn-green);
         }
 
         #btn-load-history:hover {
-            background: var(--nva-btn-purple-hover);
+            background: var(--nva-btn-green-hover);
+            border-color: var(--nva-btn-green-hover);
             transform: scale(1.05);
             color: #000000;
         }
@@ -113,11 +113,11 @@
             font-family: Arial, sans-serif;
             font-size: 13px;
             z-index: 1000;
-            background: rgba(26, 26, 26, 0.85);
+            /*background: rgba(26, 26, 26, 0.85);
             padding: 10px 15px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);*/
         }
 
         .bar-actions {
@@ -129,11 +129,11 @@
         #excel-loader-bar button, #jpg-button, #btn-add-first, #btn-reset {
             color: var(--nva-text);
             cursor: pointer;
-            background: var(--nva-primary);
+            /*background: var(--nva-primary);*/
             padding: 8px 16px;
             border-radius: 5px;
             font-weight: bold;
-            border: 1px solid var(--nva-primary-hover);
+            /*border: 1px solid var(--nva-primary-hover);*/
             transition: background 0.2s, transform 0.1s;
             display: inline-block;
             font-family: Arial, sans-serif;
@@ -149,13 +149,15 @@
         }
 
         #btn-reset:hover {
-            background: var(--nva-warning-hover);
-            transform: scale(1.03);
+            background: var(--nva-primary-hover);
+            border-color: var(--nva-primary-hover);
+            transform: scale(1.05);
+            color: #000000;
         }
 
         #jpg-button {
-            background: var(--nva-btn-blue);
-            border-color: var(--nva-btn-blue-hover);
+            background: var(--nva-btn-purple);
+            border-color: var(--nva-btn-purple-hover);
         }
 
         #btn-add-first {
@@ -166,12 +168,15 @@
 
         #jpg-button:hover {
             background: var(--nva-btn-blue-hover);
-            transform: scale(1.03);
+            border-color: var(--nva-btn-blue-hover);
+            transform: scale(1.05);
+            color: #000000;
         }
 
         #btn-add-first:hover {
             background: var(--nva-btn-green-hover);
-            transform: scale(1.03);
+            transform: scale(1.05);
+            color: #000000;
         }
 
         /* ==========================================================================
@@ -1780,7 +1785,7 @@
                 setTimeout(() => {
                     fitCalendarText();
                     refreshAllTeamTexts();
-                }, 50);
+                }, 150);
             });
         }
     </script>
