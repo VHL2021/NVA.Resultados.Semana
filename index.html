@@ -1064,7 +1064,7 @@
                 const matches = [];
 
                 // Regla 2: Filas siguientes con datos separados por "|"
-                // Formato: Equipo Casa | Equipo Visitante | Fecha Partido | Hora Partido | Campo
+                // Formato: Equipo Casa | Equipo Visitante | Fecha Partido | Hora Partido | Campo | Categoria
                 for (let i = 1; i < lines.length; i++) {
                     const parts = lines[i].split('|').map(p => p.trim());
                     if (parts.length >= 2) {
@@ -1073,7 +1073,8 @@
                             awayTeam: parts[1] || '',
                             matchDate: parts[2] || '',
                             matchTime: parts[3] || '',
-                            venue: parts[4] || ''
+                            venue: parts[4] || '',
+                            category: parts[parts.length - 1] || '' // Extrae el último valor de la fila (Categoría)
                         });
                     }
                 }
@@ -1124,7 +1125,7 @@
             group.matches.forEach(match => {
                 createNewCard();
                 const card = mainContent.lastElementChild;
-                applyMatchDataToCard(card, match.homeTeam, match.awayTeam);
+                applyMatchDataToCard(card, match.homeTeam, match.awayTeam, match.category);
             });
 
             updateAddFirstButtonVisibility();
@@ -1132,21 +1133,40 @@
             showToast(`Cargados ${group.matches.length} partido(s) para la fecha seleccionada.`);
         }
 
-        function applyMatchDataToCard(card, homeTeamName, awayTeamName) {
+        function applyMatchDataToCard(card, homeTeamName, awayTeamName, matchCategory = '') {
             // Buscar coincidencia en bases de datos locales (Equipos NVA y Otros Equipos)
-            function findTeamData(teamName) {
+            function findTeamData(teamName, matchCat = '') {
                 const search = teamName.trim().toUpperCase();
-                let found = EQUIPOS_NVA_DATA.find(item => (item.EQUIPO || item.equipo || '').toString().trim().toUpperCase() === search);
+                const catSearch = matchCat.trim().toUpperCase();
+
+                let found = null;
+                if (catSearch) {
+                    found = EQUIPOS_NVA_DATA.find(item => 
+                        (item.EQUIPO || item.equipo || '').toString().trim().toUpperCase() === search &&
+                        (item.CATEGORIA || item.categoria || '').toString().trim().toUpperCase() === catSearch
+                    );
+                }
+                if (!found) {
+                    found = EQUIPOS_NVA_DATA.find(item => (item.EQUIPO || item.equipo || '').toString().trim().toUpperCase() === search);
+                }
                 if (found) return { data: found, isNva: true };
 
-                found = OTROS_EQUIPOS_DATA.find(item => (item.EQUIPO || item.equipo || '').toString().trim().toUpperCase() === search);
+                if (catSearch) {
+                    found = OTROS_EQUIPOS_DATA.find(item => 
+                        (item.EQUIPO || item.equipo || '').toString().trim().toUpperCase() === search &&
+                        (item.CATEGORIA || item.categoria || '').toString().trim().toUpperCase() === catSearch
+                    );
+                }
+                if (!found) {
+                    found = OTROS_EQUIPOS_DATA.find(item => (item.EQUIPO || item.equipo || '').toString().trim().toUpperCase() === search);
+                }
                 if (found) return { data: found, isNva: false };
 
                 return null;
             }
 
-            const homeMatch = findTeamData(homeTeamName);
-            const awayMatch = findTeamData(awayTeamName);
+            const homeMatch = findTeamData(homeTeamName, matchCategory);
+            const awayMatch = findTeamData(awayTeamName, matchCategory);
 
             // 1. Asignar nombres
             const homeSpan = card.querySelector('.team-home-container .team-inner-text');
@@ -1173,11 +1193,11 @@
                 }
             }
 
-            // 3. Aplicar categoría y color si es equipo NVA
+            // 3. Aplicar categoría y color si es equipo NVA (o la categoría del historial)
             const nvaTeamInfo = (homeMatch && homeMatch.isNva) ? homeMatch : ((awayMatch && awayMatch.isNva) ? awayMatch : null);
+            const categoryEl = card.querySelector('.text-category');
             if (nvaTeamInfo && nvaTeamInfo.data) {
-                const categoryEl = card.querySelector('.text-category');
-                const categoryName = (nvaTeamInfo.data.CATEGORIA || nvaTeamInfo.data.categoria || '').toString().trim();
+                const categoryName = (nvaTeamInfo.data.CATEGORIA || nvaTeamInfo.data.categoria || matchCategory || '').toString().trim();
                 const colorCode = nvaTeamInfo.data.COLOR || nvaTeamInfo.data.color || '';
 
                 if (categoryName) categoryEl.textContent = categoryName;
@@ -1186,6 +1206,8 @@
                     cardBg.dataset.appliedColor = colorCode;
                     applyColorFilter(cardBg, colorCode);
                 }
+            } else if (matchCategory) {
+                categoryEl.textContent = matchCategory.trim();
             }
 
             // 4. Ajuste dinámico de dimensiones de texto
@@ -1749,7 +1771,7 @@
         if (!loadAppState()) {
             createNewCard();
         } else {
-            // Forzar el reajuste de textos una vez que el navegador ha calculado el layout/geometría
+            // Forzar el reajuste de textos una vez que el navegador ha calculated el layout/geometría
             requestAnimationFrame(() => {
                 setTimeout(() => {
                     fitCalendarText();
