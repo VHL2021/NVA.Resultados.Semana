@@ -648,6 +648,22 @@
         </div>
     </div>
 
+    <!-- Modal de selección del modo de exportación JPG.
+         "TODO" conserva la exportación original completa.
+         "SEPARADO" genera un JPG por grupo: INFANTIL, CADETE y JUVENIL + SENIOR. -->
+    <div id="jpgModeModal" class="modal">
+        <div class="modal-box">
+            <h3>¿Cómo quieres descargar el cartel?</h3>
+            <p style="font-size:13px;color:#aaa;margin-bottom:18px;">
+                Selecciona el modo de exportación.
+            </p>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button id="jpgModeAllBtn" class="btn-modal-action" style="background:var(--nva-btn-purple);">TODO</button>
+                <button id="jpgModeSeparateBtn" class="btn-modal-action" style="background:var(--nva-btn-green);">SEPARADO</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Plantilla del cuadro sin elementos inferiores -->
     <template id="card-template">
         <div class="match-card-container">
@@ -994,53 +1010,148 @@
             });
         }
 
-        // === EVENTO BOTÓN DESCARGAR JPG ===
-        jpgButton.addEventListener('click', async () => {
+        // === EXPORTACIÓN JPG: SELECCIÓN DEL MODO ===
+        const jpgModeModal = document.getElementById('jpgModeModal');
+        const jpgModeAllBtn = document.getElementById('jpgModeAllBtn');
+        const jpgModeSeparateBtn = document.getElementById('jpgModeSeparateBtn');
+
+        // Al pulsar "DESCARGAR JPG" primero preguntamos el modo de exportación.
+        jpgButton.addEventListener('click', () => {
+            jpgModeModal.style.display = 'flex';
+        });
+
+        jpgModeAllBtn.addEventListener('click', async () => {
+            jpgModeModal.style.display = 'none';
+            await exportJpg('all');
+        });
+
+        jpgModeSeparateBtn.addEventListener('click', async () => {
+            jpgModeModal.style.display = 'none';
+            await exportJpg('separate');
+        });
+
+        // Agrupa las categorías del cartel para la exportación separada.
+        // JUVENIL y SENIOR se incluyen deliberadamente en el mismo JPG.
+        function getCategoryExportGroup(category) {
+            const normalized = String(category || '').trim().toUpperCase();
+            if (normalized.startsWith('INFANTIL')) return 'INFANTIL';
+            if (normalized.startsWith('CADETE')) return 'CADETE';
+            if (normalized.startsWith('JUVENIL') || normalized.startsWith('SENIOR')) return 'JUVENIL-SENIOR';
+            return null;
+        }
+
+        // Convierte un canvas en una descarga JPG.
+        function downloadCanvasAsJpg(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/jpeg', 0.95);
+            link.click();
+        }
+
+        // Captura el cartel completo o solamente las tarjetas del grupo indicado.
+        // El encabezado permanece siempre visible en las capturas separadas.
+        async function captureJpg(mode, groupName = '') {
+            const captureElement = document.getElementById('capture-area');
+            const cards = Array.from(document.querySelectorAll('.match-card-container'));
+
+            if (mode === 'all') {
+                return await html2canvas(captureElement, {
+                    backgroundColor: '#000000',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true
+                });
+            }
+
+            const hiddenCards = [];
+            cards.forEach(card => {
+                const category = card.querySelector('.text-category')?.textContent || '';
+                if (getCategoryExportGroup(category) !== groupName) {
+                    hiddenCards.push(card);
+                    card.style.display = 'none';
+                }
+            });
+
+            if (hiddenCards.length === cards.length) {
+                hiddenCards.forEach(card => card.style.display = '');
+                return null;
+            }
+
+            try {
+                // Esperamos al reflow para que html2canvas no capture tarjetas ocultas.
+                await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 50)));
+
+                return await html2canvas(captureElement, {
+                    backgroundColor: '#000000',
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true
+                });
+            } finally {
+                // El cartel editable queda exactamente como estaba antes de capturar.
+                hiddenCards.forEach(card => card.style.display = '');
+            }
+        }
+
+        // Exportación principal: "TODO" genera un único JPG; "SEPARADO"
+        // genera hasta tres JPG, manteniendo el mismo encabezado/título.
+        async function exportJpg(mode) {
             const originalText = jpgButton.innerHTML;
             jpgButton.innerHTML = '⏳ PROCESANDO...';
             jpgButton.style.pointerEvents = 'none';
-            
+
             const excelBar = document.getElementById('excel-loader-bar');
             const topBar = document.getElementById('top-loader-bar');
-            excelBar.style.display = 'none';
-            topBar.style.display = 'none';
 
-            await prepareCardsForCapture();
+            try {
+                excelBar.style.display = 'none';
+                topBar.style.display = 'none';
 
-            const captureElement = document.getElementById('capture-area');
+                // Conservamos la preparación original de fondos para las capturas.
+                await prepareCardsForCapture();
 
-            setTimeout(() => {
-                html2canvas(captureElement, { 
-                    backgroundColor: '#000000', 
-                    scale: 2, 
-                    useCORS: true, 
-                    allowTaint: true 
-                })
-                .then(canvas => {
-                    excelBar.style.display = 'flex';
-                    topBar.style.display = 'flex';
-                    restoreCardsAfterCapture();
-                    const link = document.createElement('a');
-                    link.download = 'cartel-resultados-nou-volei-alzira.jpg';
-                    link.href = canvas.toDataURL('image/jpeg', 0.95);
-                    link.click();
+                if (mode === 'all') {
+                    const canvas = await captureJpg('all');
+                    downloadCanvasAsJpg(canvas, 'cartel-resultados-nou-volei-alzira.jpg');
                     showToast('¡Imagen descargada con éxito!');
-                })
-                .catch(err => {
-                    console.error("Error html2canvas:", err);
-                    excelBar.style.display = 'flex';
-                    topBar.style.display = 'flex';
-                    restoreCardsAfterCapture();
-                    showToast("Error al exportar. Comprueba los ficheros locales.", true);
-                })
-                .finally(() => {
-                    jpgButton.innerHTML = originalText;
-                    jpgButton.style.pointerEvents = 'auto';
-                });
-            }, 150);
-        });
+                    return;
+                }
 
-        // ==========================================================================
+                const groups = ['INFANTIL', 'CADETE', 'JUVENIL-SENIOR'];
+                let generated = 0;
+
+                for (const groupName of groups) {
+                    const canvas = await captureJpg('separate', groupName);
+                    if (!canvas) continue;
+
+                    downloadCanvasAsJpg(
+                        canvas,
+                        `cartel-resultados-nou-volei-alzira-${groupName.toLowerCase()}.jpg`
+                    );
+                    generated++;
+
+                    // Pausa breve para que el navegador acepte las descargas consecutivas.
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+
+                if (generated > 0) {
+                    showToast(`¡${generated} JPG separado(s) descargado(s) con éxito!`);
+                } else {
+                    showToast('No hay tarjetas INFANTIL, CADETE, JUVENIL o SENIOR para exportar.', true);
+                }
+            } catch (err) {
+                console.error("Error html2canvas:", err);
+                showToast("Error al exportar. Comprueba los ficheros locales.", true);
+            } finally {
+                // Restauramos interfaz y fondos aunque la captura falle.
+                restoreCardsAfterCapture();
+                excelBar.style.display = 'flex';
+                topBar.style.display = 'flex';
+                jpgButton.innerHTML = originalText;
+                jpgButton.style.pointerEvents = 'auto';
+            }
+        }
+
         // SISTEMA DE CARGA Y PROCESAMIENTO DE HISTORIAL DESDE TXT
         // ==========================================================================
         btnLoadHistory.addEventListener('click', () => {
@@ -1771,6 +1882,7 @@
             if (e.target === teamPickerModal) teamPickerModal.style.display = 'none';
             if (e.target === scoreModal) { scoreModal.style.display = 'none'; currentScoreContainer = null; }
             if (e.target === historyModal) historyModal.style.display = 'none';
+            if (e.target === jpgModeModal) jpgModeModal.style.display = 'none';
         });
 
         // === INICIALIZACIÓN DE LA APLICACIÓN ===
