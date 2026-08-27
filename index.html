@@ -1048,6 +1048,38 @@
             link.click();
         }
 
+        // ==========================================================================
+        // GENERACIÓN AUTOMÁTICA DEL NOMBRE DEL ARCHIVO JPG
+        // Formato: "Resultados [fecha seleccionada] [Categoría].jpg"
+        //
+        // La fecha se obtiene directamente del texto que aparece en el encabezado
+        // del cartel. De este modo, si el usuario cambia el periodo seleccionado,
+        // el nombre de los JPG también cambia automáticamente.
+        // ==========================================================================
+        function getJpgFilename(category) {
+            const dateElement = document.getElementById('date-text');
+            let selectedDate = dateElement ? dateElement.textContent.trim() : '';
+
+            // Evitamos caracteres que Windows no permite en nombres de archivos.
+            // También convertimos varios espacios consecutivos en uno solo.
+            selectedDate = selectedDate
+                .replace(/[\\/:*?"<>|]/g, '-')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            // Si todavía no se ha seleccionado una fecha, utilizamos un texto
+            // neutro para que la descarga siga funcionando correctamente.
+            if (!selectedDate) selectedDate = 'Sin fecha';
+
+            // En el grupo JUVENIL-SENIOR mostramos el nombre de las dos categorías
+            // separado por un espacio, tal como solicita el formato del archivo.
+            const categoryLabel = category === 'JUVENIL-SENIOR'
+                ? 'JUVENIL SENIOR'
+                : String(category || 'TODO').trim();
+
+            return `Resultados ${selectedDate} ${categoryLabel}.jpg`;
+        }
+
         // Captura el cartel completo o solamente las tarjetas del grupo indicado.
         // El encabezado permanece siempre visible en las capturas separadas.
         async function captureJpg(mode, groupName = '') {
@@ -1112,7 +1144,7 @@
 
                 if (mode === 'all') {
                     const canvas = await captureJpg('all');
-                    downloadCanvasAsJpg(canvas, 'cartel-resultados-nou-volei-alzira.jpg');
+                    downloadCanvasAsJpg(canvas, getJpgFilename('TODO'));
                     showToast('¡Imagen descargada con éxito!');
                     return;
                 }
@@ -1126,7 +1158,7 @@
 
                     downloadCanvasAsJpg(
                         canvas,
-                        `cartel-resultados-nou-volei-alzira-${groupName.toLowerCase()}.jpg`
+                        getJpgFilename(groupName)
                     );
                     generated++;
 
